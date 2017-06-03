@@ -25,5 +25,14 @@
 
    For my personal usage, I work with macOS Sierra and install opencv 3.0 with Python 3.x for future development.
 
-2. ### Nothing else to write down yet.
+2. ### Project Structure
+
+   - /practice
+     - see /practice/Practice_Category.md
+   - /train
+   - /util
+   - main.py
+   - README.md
+
+3. ### 
 

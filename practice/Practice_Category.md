@@ -19,5 +19,6 @@
 | 15     | 霍夫线性变换           | st.hough_line() & st.probabilistic_hough_line() |
 | 16     | 霍夫圆与椭圆变化         | transform.hough_circle() & transform.hough_ellipse() |
 | 17     | 边缘与轮廓            | measure.find_contours() & measure.subdivide_polygon() & measure.approximate_polygon() |
-| 18     | 高级形态学处理          | morphology.convex_hull_image() & morphology.convex_hull_object() & mearsure.regionprops() & measure.label() |
-| 19     | 骨架提取和分水岭算法       |                                          |
+| 18     | 高级形态学处理          | morphology.convex_hull_image() & morphology.convex_hull_object() & mearsure.regionprops() & measure.label() & morphology.remove_small_objects() |
+| 19     | 骨架提取和分水岭算法       | morphology.skeletonize() & morphology.medial_axis() & feature.peak_local_max() & morphology.watershed() & filters.rank.gradient() |
+
