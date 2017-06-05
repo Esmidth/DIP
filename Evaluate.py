@@ -31,13 +31,23 @@ def draw_lines(data):
 
 
 def split_str(str):
-    seps = str.split('\r\n')
-    for i, sep in enumerate(seps):
-        if '\r' in sep:
-            seps[i] = sep[:-1]
+    seps = str.split('\n')
+    for i in range(3):
+        for i, sep in enumerate(seps):
+            if '\r' in sep:
+                seps[i] = sep[:-1]
         if sep == '':
             del seps[i]
     return seps
+
+
+def split_str1(str):
+    str1 = str
+    odd = []
+    even = []
+    seps = []
+    while len(str1) != 0:
+        str1.find('\n')
 
 
 def two_parp(seps):
@@ -45,9 +55,9 @@ def two_parp(seps):
     even = []
     for i, sep in enumerate(seps):
         if i % 2 == 0:
-            even.append(sep)
-        else:
             odd.append(sep)
+        else:
+            even.append(sep)
     return odd, even
 
 
@@ -61,10 +71,14 @@ def test():
 
 def test_split():
     path = '/Users/esmidth/Github/DIP/train'
-    file = path + '/' + 'Train_BJ_004.txt'
+    file = path + '/' + 'Train_BJ_002.txt'
     str = load_txt(file)
+    seps = split_str(str)
+    odd, even = two_parp(seps)
     a = []
     a.append(str)
+    # print(odd)
+    print(seps)
     print(a)
 
 
