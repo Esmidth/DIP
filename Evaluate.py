@@ -39,14 +39,27 @@ def draw_lines(img, odd):
     for o in odd:
         coord_s = o.split(',')
         objects.append(coord_s)
+    for i, seg in enumerate(objects):
+        for j, points in enumerate(seg):
+            seg[j] = int(points)
 
+    for o in objects:
+        img[o[1], o[0]] = [255, 0, 0]
+        img[o[3], o[2]] = [255, 0, 0]
+        img[o[5], o[4]] = [255, 0, 0]
+        img[o[7], o[6]] = [255, 0, 0]
+
+    return objects
+
+
+'''
     for o in objects:
         img[int(o[1]), int(o[0])] = [255, 0, 0]
         img[int(o[3]), int(o[2])] = [255, 0, 0]
         img[int(o[5]), int(o[4])] = [255, 0, 0]
         img[int(o[7]), int(o[6])] = [255, 0, 0]
 
-    return objects
+'''
 
 
 def split_str(str):
