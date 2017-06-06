@@ -32,6 +32,7 @@
    - /train
    - /util
    - main.py
+   - Evaluate.py
    - README.md
 
 3. ### 

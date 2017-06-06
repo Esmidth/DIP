@@ -27,39 +27,63 @@ def load_txt(file):
     return content
 
 
-def draw_lines(img, odd):
+def draw_lines(img, coord, color='r'):
     """
 
-    :param image: np.ndarray
-    :param odd:
-    :return:
+    :param color: str -> determinate the color of polygon
+    :param img: np.ndarray
+    :param coord: list -> coordinate points
+    :return objects: list -> coordinate points divided into segments
     """
-    coord_s = []
     objects = []
-    for o in odd:
-        coord_s = o.split(',')
-        objects.append(coord_s)
+    c = [255, 255, 255]
+    if color == 'r':
+        c = [255, 0, 0]
+    elif color == 'g':
+        c = [0, 255, 0]
+    else:
+        pass
+    for o in coord:
+        seg = o.split(',')
+        points = [[int(seg[0]), int(seg[1])], [int(seg[2]), int(seg[3])], [int(seg[4]), int(seg[5])],
+                  [int(seg[6]), int(seg[7])]]
+        objects.append(points)
+    for seg in objects:
+        x = []
+        y = []
+        for point in seg:
+            x.append(point[0])
+            y.append(point[1])
+        x = np.array(x)
+        y = np.array(y)
+        rr, cc = draw.polygon_perimeter(y, x)
+        img[rr, cc] = c
+    '''
     for i, seg in enumerate(objects):
         for j, points in enumerate(seg):
             seg[j] = int(points)
+    for seg in objects:
+        points = [[int(seg[0]), int(seg[1])], [int(seg[2]), int(seg[3])], [int(seg[4]), int(seg[5])],
+                  [int(seg[6]), int(seg[7])]]
+        objects_points.append(points)
+    '''
 
+    '''
+    for seg in objects:  # Draw Polygon as mask on the location
+        x = np.array([seg[0], seg[2], seg[4], seg[6]])
+        y = np.array([seg[1], seg[3], seg[5], seg[7]])
+        rr, cc = draw.polygon_perimeter(y, x)
+        img[rr, cc] = c
+    '''
+    '''
     for o in objects:
         img[o[1], o[0]] = [255, 0, 0]
         img[o[3], o[2]] = [255, 0, 0]
         img[o[5], o[4]] = [255, 0, 0]
         img[o[7], o[6]] = [255, 0, 0]
+    '''
 
     return objects
-
-
-'''
-    for o in objects:
-        img[int(o[1]), int(o[0])] = [255, 0, 0]
-        img[int(o[3]), int(o[2])] = [255, 0, 0]
-        img[int(o[5]), int(o[4])] = [255, 0, 0]
-        img[int(o[7]), int(o[6])] = [255, 0, 0]
-
-'''
 
 
 def split_str(str):
@@ -78,15 +102,15 @@ def split_str(str):
     return seps
 
 
-def two_parp(seps):
-    odd = []
-    even = []
+def two_parp(seps):  # Divide seps into locations & values
+    coord = []
+    value = []
     for i, sep in enumerate(seps):
         if i % 2 == 0:
-            odd.append(sep)
+            coord.append(sep)
         else:
-            even.append(sep)
-    return odd, even
+            value.append(sep)
+    return coord, value
 
 
 def test():
@@ -118,15 +142,23 @@ def test_draw():
     # print(type(io.imread(image)))
     f = io.imread(image)
 
-    str = load_txt(txt)
-    seps = split_str(str)
-    odd, even = two_parp(seps)
-    draw_lines(f, odd=odd)
+    strr = load_txt(txt)
+    seps = split_str(strr)
+    coord, value = two_parp(seps)
+    objects_new = draw_lines(f, coord=coord)
+    for seg in objects_new:
+        for points in seg:
+            print(points)
+        print('\n')
     io.imshow(f)
     io.show()
     # print(odd)
     # print(draw_lines(odd))
     # draw_lines(image, odd)
+
+
+def test_compute():
+    pass
 
 
 if __name__ == '__main__':
