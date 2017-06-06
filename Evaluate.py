@@ -27,15 +27,12 @@ def load_txt(file):
     return content
 
 
-def draw_lines(img, coord, color='r'):
+def draw_lines(img, objects, color='r'):
     """
-
     :param color: str -> determinate the color of polygon
     :param img: np.ndarray
-    :param coord: list -> coordinate points
-    :return objects: list -> coordinate points divided into segments
+    :param objects: list -> coordinate points divided into segments
     """
-    objects = []
     c = [255, 255, 255]
     if color == 'r':
         c = [255, 0, 0]
@@ -43,11 +40,6 @@ def draw_lines(img, coord, color='r'):
         c = [0, 255, 0]
     else:
         pass
-    for o in coord:
-        seg = o.split(',')
-        points = [[int(seg[0]), int(seg[1])], [int(seg[2]), int(seg[3])], [int(seg[4]), int(seg[5])],
-                  [int(seg[6]), int(seg[7])]]
-        objects.append(points)
     for seg in objects:
         x = []
         y = []
@@ -83,7 +75,7 @@ def draw_lines(img, coord, color='r'):
         img[o[7], o[6]] = [255, 0, 0]
     '''
 
-    return objects
+    # return objects
 
 
 def split_str(str):
@@ -93,7 +85,8 @@ def split_str(str):
     :return: list-> odd as coordinate location, even as value
     """
     seps = str.split('\n')
-    for j in range(3):
+    repeat = 3
+    for j in range(repeat):
         for i, sep in enumerate(seps):
             if '\r' in sep:
                 seps[i] = sep[:-1]
@@ -102,15 +95,21 @@ def split_str(str):
     return seps
 
 
-def two_parp(seps):  # Divide seps into locations & values
+def divide_para(seps):  # Divide seps into locations & values
     coord = []
-    value = []
+    contents = []
+    objects = []
     for i, sep in enumerate(seps):
         if i % 2 == 0:
             coord.append(sep)
         else:
-            value.append(sep)
-    return coord, value
+            contents.append(sep)
+    for o in coord:
+        seg = o.split(',')
+        points = [[int(seg[0]), int(seg[1])], [int(seg[2]), int(seg[3])], [int(seg[4]), int(seg[5])],
+                  [int(seg[6]), int(seg[7])]]
+        objects.append(points)
+    return objects, contents
 
 
 def test():
@@ -126,7 +125,7 @@ def test_split():
     file = path + '/' + 'Train_BJ_002.txt'
     str = load_txt(file)
     seps = split_str(str)
-    odd, even = two_parp(seps)
+    odd, even = divide_para(seps)
     a = []
     a.append(str)
     # print(odd)
@@ -144,11 +143,12 @@ def test_draw():
 
     strr = load_txt(txt)
     seps = split_str(strr)
-    coord, value = two_parp(seps)
-    objects_new = draw_lines(f, coord=coord)
-    for seg in objects_new:
+    objects, contents = divide_para(seps)
+    draw_lines(f, objects=objects)
+    for i, seg in enumerate(objects):
         for points in seg:
             print(points)
+        print(contents[i])
         print('\n')
     io.imshow(f)
     io.show()
