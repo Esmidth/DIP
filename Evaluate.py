@@ -4,6 +4,7 @@ import os
 import sys
 import codecs
 import numpy as np
+import Const
 
 
 def load_image(file):
@@ -27,7 +28,7 @@ def load_txt(file):
     return content
 
 
-def draw_lines(img, objects, color='r'):
+def draw_lines(img, objects, color='r', content=[]):
     """
     :param color: str -> determinate the color of polygon
     :param img: np.ndarray
@@ -40,16 +41,17 @@ def draw_lines(img, objects, color='r'):
         c = [0, 255, 0]
     else:
         pass
-    for seg in objects:
-        x = []
-        y = []
-        for point in seg:
-            x.append(point[0])
-            y.append(point[1])
-        x = np.array(x)
-        y = np.array(y)
-        rr, cc = draw.polygon_perimeter(y, x)
-        img[rr, cc] = c
+    for i, seg in enumerate(objects):
+        if content == [] or content[i] == '0':  # 用于粗检测
+            x = []
+            y = []
+            for point in seg:
+                x.append(point[0])
+                y.append(point[1])
+            x = np.array(x)
+            y = np.array(y)
+            rr, cc = draw.polygon_perimeter(y, x)
+            img[rr, cc] = c
     '''
     for i, seg in enumerate(objects):
         for j, points in enumerate(seg):
@@ -112,6 +114,28 @@ def divide_para(seps):  # Divide seps into locations & values
     return objects, contents
 
 
+def is_number(strr):
+    if '0' <= strr[0] <= '9':
+        return True
+    else:
+        return False
+
+
+def compute_rju(seg1, seg2):
+    area1 = (seg1[1][0] - seg1[0][0]) * (seg1[2][1] - seg1[1][1])
+    area2 = (seg2[1][0] - seg2[0][0]) * (seg2[2][1] - seg2[1][1])
+    p1 = [max(seg1[0][0], seg2[0][0]), max(seg1[0][1], seg2[0][1])]
+    p2 = [min(seg1[2][0], seg2[2][0]), min(seg1[2][1], seg2[2][1])]
+    area_join = 0
+    if p2[0] > p1[0] and p2[1] > p1[1]:
+        area_join = (p2[0] - p1[0]) * (p2[1] - p1[1])
+    area_union = (area1 + area2 - area_join)
+    if area_union > 0:
+        return area_join / area_union
+    else:
+        return 0
+
+
 def test():
     path = '/Users/esmidth/Github/DIP/train'
     image_path = path + '/' + 'Train_BJ_001.jpg'
@@ -144,12 +168,12 @@ def test_draw():
     strr = load_txt(txt)
     seps = split_str(strr)
     objects, contents = divide_para(seps)
-    draw_lines(f, objects=objects)
+    draw_lines(f, objects=objects, content=contents)
     for i, seg in enumerate(objects):
         for points in seg:
             print(points)
         print(contents[i])
-        print('\n')
+        print('No: ' + i.__str__() + '\n')
     io.imshow(f)
     io.show()
     # print(odd)
@@ -158,8 +182,15 @@ def test_draw():
 
 
 def test_compute():
-    pass
+    image1 = Const.image1
+    txt1 = Const.txt1
+    f = load_image(image1)
+    seps = split_str(load_txt(txt1))
+    objects, contents = divide_para(seps)
+    for i, seg in enumerate(objects):
+        print(str(compute_rju(objects[0], objects[i]) * 100) + '%')
 
 
 if __name__ == '__main__':
-    test_draw()
+    # test_draw()
+    test_compute()
