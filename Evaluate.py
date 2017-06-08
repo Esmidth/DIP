@@ -168,7 +168,7 @@ def test_draw():
     strr = load_txt(txt)
     seps = split_str(strr)
     objects, contents = divide_para(seps)
-    draw_lines(f, objects=objects, content=contents)
+    draw_lines(f, objects=objects, color='r', content=contents)
     for i, seg in enumerate(objects):
         for points in seg:
             print(points)
@@ -192,5 +192,5 @@ def test_compute():
 
 
 if __name__ == '__main__':
-    # test_draw()
-    test_compute()
+    test_draw()
+    # test_compute()

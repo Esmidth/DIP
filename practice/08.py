@@ -58,4 +58,4 @@ def ex4():
 
 
 if __name__ == '__main__':
-    ex4()
+    ex1()
