@@ -29,10 +29,14 @@
 
    - /practice
      - see /practice/Practice_Category.md
+     - plot_hog.py
    - /train
    - /util
    - main.py
+   - Const.py
    - Evaluate.py
+   - Preprocess.py
+   - Train.py
    - README.md
 
 3. ### 
