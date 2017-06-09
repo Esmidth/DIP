@@ -1,12 +1,11 @@
 import Const
-from skimage import color, exposure, filters, morphology, io, img_as_ubyte
+from skimage import color, exposure, filters, morphology, io
 import Evaluate as eva
 import matplotlib.pyplot as plt
 import numpy as np
 
 
 def rgb2hsv1(rgb_img):
-    # Todo: Customize RGB2HSV function
     # hsv_img = color.convert_colorspace(rgb_img, 'RGB', 'HSV')
     # hsv_img = img_as_ubyte(hsv_img)
     hsv_img = np.zeros(rgb_img.shape)
@@ -41,9 +40,8 @@ def rgb2hsv1(rgb_img):
 
 def rgb2hsv(rgb_img):
     hsv_img = color.convert_colorspace(rgb_img, 'RGB', 'HSV')
-    hsv_img[:, :, 2] = hsv_img[:, :, 2] * 255
-    hsv_img[:, :, 0] *= 360
-
+    hsv_img[:, :, 2] = hsv_img[:, :, 2] * 255  # v[0,255]
+    hsv_img[:, :, 0] *= 360  # h[0,360]
     # print('fuck', hsv_img[0, 0, 2], max(rgb_img[0, 0, :]))
     return hsv_img
 
@@ -59,53 +57,45 @@ def normalization(src_img):
 
 def thresholding(src_img):
     # Todo: modify gray_image to be returned be a 1-D array
-    Rr = 90
-    Hl = 190
-    Hh = 245
+    rr = 90
+    hl = 200
+    hh = 280
     rows, cols, dims = src_img.shape
-    img1 = np.zeros([rows, cols, dims])  # thresholding by R channel
+    img1 = np.zeros([rows, cols])  # thresholding by R channel
     img2 = np.zeros([rows, cols])
     img3 = np.zeros([rows, cols])
+    img4 = np.zeros([rows, cols])
     # print(src_img.shape, img1.shape)
-    '''
-    for i in range(rows):
-        for j in range(cols):
-            if src_img[i, j, 0] < Rr:
-                img1[i, j, 0] = 255
-                # reddish = img[:, :, 0] > 170
-                # img[reddish] = [0, 255, 0]
-                '''
-    img_points = src_img[:, :, 0] < Rr
-    img1[img_points] = [255, 255, 255]
-    hsv_img = rgb2hsv1(src_img)
-    # img_points = np.logical_and(hsv_img[:, :, 0] > Hl, hsv_img[:, :, 0] < Hh)
-    # img_points1 = hsv_img[:, :, 0] > Hl
-    # img_points2 = hsv_img[:, :, 0] < Hh
 
+    img1_points = src_img[:, :, 0] < rr
+    img1[img1_points] = 255
+    hsv_img = rgb2hsv(src_img)
+    '''
     for i in range(rows):
         for j in range(cols):
             h = hsv_img[i, j, 0]
             s = hsv_img[i, j, 1]
-            if 200 <= h <= 280 and s >= 0.55:
+            if hl <= h <= hh and s >= 0.55:
                 img2[i, j] = 255
             else:
                 img2[i, j] = 0
+    # this block is comparable slower than np.logical_and()
+    '''
+    img2_points = np.logical_and(hsv_img[:, :, 0] >= hl, hsv_img[:, :, 0] <= hh)
+    img2_points = np.logical_and(hsv_img[:, :, 1] >= 0.55, img2_points)
+    img2[img2_points] = 255
 
-    # print(hsv_img[0, 0, 0])
-    # img2[img_points] = [255, 255, 255]
-    hsv2 = rgb2hsv(src_img)
-    for i in range(rows):
-        for j in range(cols):
-            h = hsv2[i, j, 0]
-            s = hsv2[i, j, 1]
-            if 200 <= h <= 280 and s >= 0.55:
-                img3[i, j] = 255
-            else:
-                img3[i, j] = 0
-    img3 = img2 - img3
-    notzero = img3[:, :] != 0
-    img3[notzero] = 255
-    return img1, img2, img3
+    gray_img = np.zeros([rows, cols])
+    gray_img[:, :] = (src_img[:, :, 0] - src_img[:, :, 2])
+    thresh = filters.threshold_otsu(gray_img)
+    img3 = (gray_img <= thresh) * 255
+
+    img_points = np.logical_and(img1_points, img2_points)
+    img4_points = np.logical_and(img_points, img3[:, :] == 255)
+
+    img4[img4_points] = 255
+
+    return img1, img2, img3, img4
 
 
 def preprocess(src_img):
@@ -150,24 +140,32 @@ def test_preprocess():
 def test_thresholding():
     img = eva.load_image(Const.image1)
     # display(img)
-    fuck1, fuck2, fuck3 = thresholding(src_img=img)
+    fuck1, fuck2, fuck3, fuck4 = thresholding(src_img=img)
     fuck1 = color.rgb2grey(fuck1)
     fuck2 = color.rgb2grey(fuck2)
     fuck3 = color.rgb2grey(fuck3)
-    plt.subplot(221)
+    fuck4 = color.rgb2grey(fuck4)
+
+    plt.figure('Thresholding', figsize=(10, 10))
+    plt.subplot(321)
     plt.title('origin')
     io.imshow(img)
-    plt.subplot(222)
+
+    plt.subplot(322)
     plt.title('R')
     io.imshow(fuck1)
-    plt.subplot(223)
+
+    plt.subplot(323)
     plt.title('H')
     io.imshow(fuck2)
-    plt.subplot(224)
-    plt.title('Diff')
+
+    plt.subplot(324)
+    plt.title('Otsu')
     io.imshow(fuck3)
-    # plt.show()
-    # io.imshow(fuck)
+
+    plt.subplot(325)
+    plt.title('AND')
+    io.imshow(fuck4)
     io.show()
 
 
