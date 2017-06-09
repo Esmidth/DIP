@@ -89,31 +89,50 @@ def thresholding(src_img):
     gray_img[:, :] = (src_img[:, :, 0] - src_img[:, :, 2])
     thresh = filters.threshold_otsu(gray_img)
     img3 = (gray_img <= thresh) * 255
+    img3[:, :] = 255
 
     img_points = np.logical_and(img1_points, img2_points)
     img4_points = np.logical_and(img_points, img3[:, :] == 255)
 
     img4[img4_points] = 255
+    return img4
+    # return img1, img2, img3, img4
 
-    return img1, img2, img3, img4
+
+def morphology_cust(gray_img):
+    gray_img = morphology.closing(gray_img, morphology.square(2))
+    return gray_img
 
 
 def preprocess(src_img):
+    # Todo: Add Output Function to Judge The Preprocess Quality
     """
 
     :param src_img:
     :return: img
     """
     # hsv_img = rgb2hsv(src_img)
-    thresh_s = 1
-    thresh_i = 1
-    thresh_j = 1
-    gray_img = color.rgb2grey(src_img)
-    thresh = filters.threshold_otsu(gray_img)
-    bw = morphology.closing(gray_img > thresh, morphology.square(1))
+    gray_img = thresholding(src_img)
+    img1 = morphology_cust(gray_img)
+    img2 = abs(gray_img - img1)
 
-    plt.imshow(bw, plt.cm.gray)
-    plt.show()
+    plt.subplot(221)
+    plt.title('origin')
+    io.imshow(src_img)
+
+    plt.subplot(222)
+    plt.title('gray_img')
+    io.imshow(gray_img)
+
+    plt.subplot(223)
+    plt.title('morphology')
+    io.imshow(img1)
+
+    plt.subplot(224)
+    plt.title('diff')
+    io.imshow(img2)
+
+    io.show()
 
 
 def display(img, color_type='rgb'):
@@ -138,7 +157,7 @@ def test_preprocess():
 
 
 def test_thresholding():
-    img = eva.load_image(Const.image1)
+    img = eva.load_image(Const.image + '7.jpg')
     # display(img)
     fuck1, fuck2, fuck3, fuck4 = thresholding(src_img=img)
     fuck1 = color.rgb2grey(fuck1)
@@ -188,7 +207,7 @@ def test_1d_image():
 
 
 if __name__ == '__main__':
-    # test_preprocess()
+    test_preprocess()
     # test_display()
-    test_thresholding()
+    # test_thresholding()
     # test_1d_image()
