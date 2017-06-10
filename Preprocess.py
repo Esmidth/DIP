@@ -1,5 +1,5 @@
 import Const
-from skimage import color, exposure, filters, morphology, io
+from skimage import color, exposure, filters, morphology, io, segmentation, measure
 import Evaluate as eva
 import matplotlib.pyplot as plt
 import numpy as np
@@ -56,7 +56,6 @@ def normalization(src_img):
 
 
 def thresholding(src_img):
-    # Todo: modify gray_image to be returned be a 1-D array
     rr = 90
     hl = 200
     hh = 280
@@ -99,9 +98,28 @@ def thresholding(src_img):
     # return img1, img2, img3, img4
 
 
-def morphology_cust(gray_img):
-    gray_img = morphology.closing(gray_img, morphology.square(2))
+def morphology_c(gray_img):
+    # gray_img = morphology.closing(gray_img, morphology.square(3))
+    for i in range(1):
+        gray_img = morphology.erosion(gray_img, morphology.square(3))
+    for i in range(1):
+        gray_img = morphology.dilation(gray_img, morphology.square(3))
+        '''
+    for i in range(1):
+        gray_img = morphology.dilation(gray_img, morphology.square(5))
+    for i in range(1):
+        gray_img = morphology.erosion(gray_img, morphology.square(5))
+        '''
     return gray_img
+
+
+def connect_component_labeling(src_img):
+    cleared = src_img.copy()
+    segmentation.clear_border(cleared)
+    label_image = measure.label(cleared)
+    borders = np.logical_xor(src_img, cleared)
+    label_image[borders] = -1
+    return label_image
 
 
 def preprocess(src_img):
@@ -113,24 +131,25 @@ def preprocess(src_img):
     """
     # hsv_img = rgb2hsv(src_img)
     gray_img = thresholding(src_img)
-    img1 = morphology_cust(gray_img)
-    img2 = abs(gray_img - img1)
+    img1 = morphology_c(gray_img)
+    label_image = connect_component_labeling(img1)
+    image_label_overlay = color.label2rgb(label_image, image=src_img)
 
     plt.subplot(221)
     plt.title('origin')
     io.imshow(src_img)
 
     plt.subplot(222)
-    plt.title('gray_img')
-    io.imshow(gray_img)
-
-    plt.subplot(223)
-    plt.title('morphology')
+    plt.title('morphology_c')
     io.imshow(img1)
 
+    plt.subplot(223)
+    plt.title('label_image')
+    io.imshow(label_image)
+
     plt.subplot(224)
-    plt.title('diff')
-    io.imshow(img2)
+    plt.title('label_overlay')
+    io.imshow(image_label_overlay)
 
     io.show()
 
@@ -152,8 +171,9 @@ def test_display():
 
 
 def test_preprocess():
-    src_img = eva.load_image(Const.image1)
-    preprocess(src_img)
+    for i in range(1, 9):
+        src_img = eva.load_image(Const.image + i.__str__() + '.jpg')
+        preprocess(src_img)
 
 
 def test_thresholding():
@@ -188,6 +208,31 @@ def test_thresholding():
     io.show()
 
 
+def test_morphology_c():
+    src_img = eva.load_image(Const.image1)
+    gray_img = thresholding(src_img)
+    img1 = morphology_c(gray_img)
+    img2 = abs(gray_img - img1)
+
+    plt.subplot(221)
+    plt.title('origin')
+    io.imshow(src_img)
+
+    plt.subplot(222)
+    plt.title('gray_img')
+    io.imshow(gray_img)
+
+    plt.subplot(223)
+    plt.title('morphology')
+    io.imshow(img1)
+
+    plt.subplot(224)
+    plt.title('diff')
+    io.imshow(img2)
+
+    io.show()
+
+
 def test_1d_image():
     img = eva.load_image(Const.image1)
     r = img[:, :, 0]
@@ -211,3 +256,4 @@ if __name__ == '__main__':
     # test_display()
     # test_thresholding()
     # test_1d_image()
+    # test_morphology_c()
