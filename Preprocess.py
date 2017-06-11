@@ -2,6 +2,7 @@ import Const
 from skimage import color, exposure, filters, morphology, io, segmentation, measure
 import Evaluate as eva
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
 
 
@@ -134,6 +135,19 @@ def preprocess(src_img):
     img1 = morphology_c(gray_img)
     label_image = connect_component_labeling(img1)
     image_label_overlay = color.label2rgb(label_image, image=src_img)
+    # Todo: draw polygons to divide image_label_overlay on image
+    fig, (ax0, ax1) = plt.subplots(1, 2)
+    ax0.imshow(label_image, plt.cm.gray)
+    ax1.imshow(image_label_overlay)
+    for region in measure.regionprops(label_image):
+        if region.area < 100:
+            continue
+        minr, minc, maxr, maxc = region.bbox
+        rect = mpatches.Rectangle((minc, minr), maxc - minc, maxr - minr, fill=False, edgecolor='red', linewidth=2)
+        ax1.add_patch(rect)
+
+    plt.show()
+    '''
 
     plt.subplot(221)
     plt.title('origin')
@@ -152,6 +166,7 @@ def preprocess(src_img):
     io.imshow(image_label_overlay)
 
     io.show()
+    '''
 
 
 def display(img, color_type='rgb'):
