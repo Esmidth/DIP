@@ -123,6 +123,24 @@ def connect_component_labeling(src_img):
     return label_image
 
 
+def divide_seg(label_image):
+    objects = []
+    for region in measure.regionprops(label_image):
+        if region.area < 100:
+            continue
+        else:
+            minr, minc, maxr, maxc = region.bbox
+            r_margin = 2
+            c_margin = 2
+            minr -= r_margin
+            minc -= c_margin
+            maxr += r_margin
+            maxc += c_margin
+            seg = [[minc, minr], [maxc, minr], [maxc, maxr], [minc, maxr]]
+            objects.append(seg)
+    return objects
+
+
 def preprocess(src_img):
     # Todo: Add Output Function to Judge The Preprocess Quality
     """
@@ -135,17 +153,12 @@ def preprocess(src_img):
     img1 = morphology_c(gray_img)
     label_image = connect_component_labeling(img1)
     image_label_overlay = color.label2rgb(label_image, image=src_img)
-    # Todo: draw polygons to divide image_label_overlay on image
-    fig, (ax0, ax1) = plt.subplots(1, 2)
-    ax0.imshow(label_image, plt.cm.gray)
-    ax1.imshow(image_label_overlay)
-    for region in measure.regionprops(label_image):
-        if region.area < 100:
-            continue
-        minr, minc, maxr, maxc = region.bbox
-        rect = mpatches.Rectangle((minc, minr), maxc - minc, maxr - minr, fill=False, edgecolor='red', linewidth=2)
-        ax1.add_patch(rect)
+    objects = divide_seg(label_image=label_image)
+    eva.draw_lines(src_img, objects, color='r')
 
+    fig, (ax0, ax1) = plt.subplots(1, 2)
+    ax0.imshow(image_label_overlay, plt.cm.gray)
+    ax1.imshow(src_img)
     plt.show()
     '''
 
@@ -266,9 +279,29 @@ def test_1d_image():
     plt.show()
 
 
+def test_divide_seg():
+    for i in range(1, 9):
+        src_img = eva.load_image(Const.image + i.__str__() + '.jpg')
+        preprocess(src_img)
+    gray_img = thresholding(src_img)
+    img1 = morphology_c(gray_img)
+    label_image = connect_component_labeling(img1)
+    image_label_overlay = color.label2rgb(label_image, image=src_img)
+    fig, (ax0, ax1) = plt.subplots(1, 2)
+    ax0.imshow(image_label_overlay, plt.cm.gray)
+    objects = divide_seg(label_image=label_image)
+    # rect = mpatches.Rectangle((minc, minr), maxc - minc, maxr - minr, fill=False, edgecolor='red', linewidth=2)
+    # ax1.add_patch(rect)
+
+    eva.draw_lines(src_img, objects, color='r')
+    ax1.imshow(src_img)
+    plt.show()
+
+
 if __name__ == '__main__':
-    test_preprocess()
+    # test_preprocess()
     # test_display()
     # test_thresholding()
     # test_1d_image()
     # test_morphology_c()
+    test_divide_seg()

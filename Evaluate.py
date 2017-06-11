@@ -34,11 +34,14 @@ def draw_lines(img, objects, color='r', content=[]):
     :param img: np.ndarray
     :param objects: list -> coordinate points divided into segments
     """
+    rows, cols, dims = img.shape
     c = [255, 255, 255]
     if color == 'r':
         c = [255, 0, 0]
     elif color == 'g':
         c = [0, 255, 0]
+    elif color == 'b':
+        c = 255
     else:
         pass
     for i, seg in enumerate(objects):
@@ -46,8 +49,14 @@ def draw_lines(img, objects, color='r', content=[]):
             x = []
             y = []
             for point in seg:
-                x.append(point[0])
-                y.append(point[1])
+                if point[0] >= cols:
+                    x.append(cols - 1)
+                else:
+                    x.append(point[0])
+                if point[1] >= rows:
+                    y.append(rows - 1)
+                else:
+                    y.append(point[1])
             x = np.array(x)
             y = np.array(y)
             rr, cc = draw.polygon_perimeter(y, x)
