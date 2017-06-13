@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from skimage import io, data, color, exposure
 from skimage.feature import hog
 import Preprocess as pre
+import numpy as np
 
 
 def cut_image(image, seg):
@@ -34,14 +35,24 @@ def test_cut_image():
 
 
 def test_hog():
-    image = eva.load_image(Const.image1)
-    txt = eva.load_txt(Const.txt1)
-    seps = eva.split_str(txt)
-    objects, contents = eva.divide_para(seps)
-    cute_image = cut_image(image, objects[0])
-    cute_hog = compute_hog(cute_image)
-    plt.imshow(cute_hog, plt.cm.gray)
-    plt.show()
+    i = 5
+    image = eva.load_image(Const.image + i.__str__() + '.jpg')
+    # txt = eva.load_txt(Const.txt1)
+    # seps = eva.split_str(txt)
+    # objects, contents = eva.divide_para(seps)
+    objects = pre.preprocess(image)
+    # eva.draw_lines(image,objects)
+    for seg in objects:
+        cute_image = cut_image(image, seg)
+        cute_hog = compute_hog(cute_image)
+
+        plt.subplot(131)
+        plt.imshow(cute_hog, plt.cm.gray)
+        plt.subplot(132)
+        plt.imshow(cute_image, plt.cm.gray)
+        plt.subplot(133)
+        n, bins, patches = plt.hist(cute_hog.flatten(), bins=256, normed=1, edgecolor='None', facecolor='red')
+        plt.show()
 
 
 if __name__ == '__main__':
