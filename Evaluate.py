@@ -5,6 +5,7 @@ import sys
 import codecs
 import numpy as np
 import Const
+import Preprocess as pre
 
 
 def load_image(file):
@@ -200,6 +201,24 @@ def test_compute():
         print(str(compute_rju(objects[0], objects[i]) * 100) + '%')
 
 
+def test_compute1():
+    i = 1
+    src_img = load_image(Const.image + i.__str__() + '.jpg')
+    strr = load_txt(Const.image + i.__str__() + '.txt')
+    seps = split_str(strr)
+    l_objects, l_contents = divide_para(seps)
+    d_objects = pre.preprocess(src_img)
+    for l_seg in l_objects:
+        for d_seg in d_objects:
+            temp1 = src_img.copy()
+            draw_lines(temp1, [l_seg], 'r')
+            draw_lines(temp1, [d_seg], 'g')
+            plt.imshow(temp1)
+            plt.title('RJU: %s%%' % (compute_rju(l_seg, d_seg) * 100))
+            plt.show()
+
+
 if __name__ == '__main__':
-    test_draw()
+    # test_draw()
     # test_compute()
+    test_compute1()

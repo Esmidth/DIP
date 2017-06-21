@@ -35,7 +35,7 @@ def test_cut_image():
 
 
 def test_hog():
-    i = 5
+    i = 1
     image = eva.load_image(Const.image + i.__str__() + '.jpg')
     # txt = eva.load_txt(Const.txt1)
     # seps = eva.split_str(txt)
@@ -45,13 +45,12 @@ def test_hog():
     for seg in objects:
         cute_image = cut_image(image, seg)
         cute_hog = compute_hog(cute_image)
-
         plt.subplot(131)
         plt.imshow(cute_hog, plt.cm.gray)
         plt.subplot(132)
         plt.imshow(cute_image, plt.cm.gray)
         plt.subplot(133)
-        n, bins, patches = plt.hist(cute_hog.flatten(), bins=256, normed=1, edgecolor='None', facecolor='red')
+        n, bins, patches = plt.hist(cute_hog.flatten(), bins=180, normed=1, edgecolor='None', facecolor='red')
         plt.show()
 
 
