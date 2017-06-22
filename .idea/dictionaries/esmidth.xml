@@ -5,6 +5,7 @@
       <w>gabor</w>
       <w>github</w>
       <w>hough</w>
+      <w>jpgs</w>
       <w>ndarray</w>
       <w>ostu</w>
       <w>otsu</w>
@@ -12,6 +13,7 @@
       <w>skeletonize</w>
       <w>strr</w>
       <w>thresholding</w>
+      <w>txts</w>
     </words>
   </dictionary>
 </component>

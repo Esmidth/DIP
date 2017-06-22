@@ -124,6 +124,11 @@ def divide_para(seps):  # Divide seps into locations & values
     return objects, contents
 
 
+def divide_para1(strr):
+    seps = split_str(strr)
+    return divide_para(seps)
+
+
 def is_number(strr):
     if '0' <= strr[0] <= '9':
         return True
