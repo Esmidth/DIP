@@ -28,7 +28,7 @@
      | six             | 1.10.0  |
      | tensorflow      | 1.1.0   |
      | wheel           | 0.29.0  |
-     For my personal usage, I work with macOS Sierra and install opencv 3.0 with Python 3.x for future development.
+   For my personal usage, I work with macOS Sierra and install opencv 3.0 with Python 3.x for future development.
 
 2. ### Project Structure
 
