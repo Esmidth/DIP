@@ -1,20 +1,42 @@
 from skimage import transform, data
 import matplotlib.pyplot as plt
 import numpy as np
+import Train
+import Evaluate as eva
+import Preprocess as pre
 
 
 def ex_1():  # resize image to target size
     img = data.camera()
-    dst = transform.resize(img, (80, 60))
+    size1 = transform.resize(img, (200, 200))
+    fd1, hog1 = Train.compute_hog(size1)
+    size2 = transform.resize(size1, (1024, 1024))
+    fd2, hog2 = Train.compute_hog(size2)
     plt.figure('resize')
 
-    plt.subplot(121)
+    plt.subplot(231)
     plt.title('origin')
-    plt.imshow(img, plt.cm.gray)
+    plt.imshow(size1, plt.cm.gray)
 
-    plt.subplot(122)
+    plt.subplot(234)
     plt.title('after')
-    plt.imshow(dst, plt.cm.gray)
+    plt.imshow(size2, plt.cm.gray)
+
+    plt.subplot(232)
+    plt.title('hog1')
+    plt.imshow(hog1, plt.cm.gray)
+
+    plt.subplot(235)
+    plt.title('hog2')
+    plt.imshow(hog2, plt.cm.gray)
+
+    plt.subplot(233)
+    plt.title('hog1')
+    n, bins, patches = plt.hist(hog1.flatten(), bins=180, normed=1, edgecolor='None', facecolor='red')
+
+    plt.subplot(236)
+    plt.title('hog2')
+    n, bins, patches = plt.hist(hog2.flatten(), bins=180, normed=1, edgecolor='None', facecolor='red')
 
     plt.show()
 
@@ -68,4 +90,4 @@ def ex_4():
 
 
 if __name__ == "__main__":
-    ex_4()
+    ex_1()
