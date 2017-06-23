@@ -179,11 +179,11 @@ def test_draw():
     image = path + '.jpg'
     # print(type(io.imread(image)))
     f = io.imread(image)
-
     strr = load_txt(txt)
     seps = split_str(strr)
     objects, contents = divide_para(seps)
     draw_lines(f, objects=objects, color='r', content=contents)
+    # draw_lines(f, objects=objects, color='r')
     for i, seg in enumerate(objects):
         for points in seg:
             print(points)
@@ -194,6 +194,40 @@ def test_draw():
     # print(odd)
     # print(draw_lines(odd))
     # draw_lines(image, odd)
+
+
+def test_neg_draw():
+    number = 1
+    image = load_image(Const.image + number.__str__() + '.jpg')
+    strr = load_txt(Const.image + number.__str__() + '.txt')
+    l_objects, l_contents = divide_para1(strr)
+    p_objects = []
+    for i, l_content in enumerate(l_contents):
+        if l_content == '0':
+            p_objects.append(l_objects[i])
+
+    temp_objects = generate_neg_region(image, p_objects)
+    draw_lines(image, temp_objects)
+    pre.display(image)
+
+
+def generate_neg_region(src_img, pos_objects):
+    rows, cols, dims = src_img.shape
+    rows -= 1
+    cols -= 1
+    temp_objects = pos_objects.copy()
+    neg_objects = []
+    for i in range(len(pos_objects)):
+        x1 = np.random.randint(0, cols)
+        y1 = np.random.randint(0, rows)
+        x2 = np.random.randint(x1 + 1, cols)
+        y2 = np.random.randint(y1 + 1, rows)
+        neg_objects.append([[x1, y1], [x2, y1], [x2, y2], [x1, y2]])
+        # print(x1, y1)
+        # print(x2, y2)
+    # print(temp_objects)
+    # print(pos_objects)
+    return neg_objects
 
 
 def test_compute():
@@ -226,4 +260,5 @@ def test_compute1():
 if __name__ == '__main__':
     # test_draw()
     # test_compute()
-    test_compute1()
+    # test_compute1()
+    test_neg_draw()

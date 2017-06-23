@@ -34,12 +34,13 @@ def extract_feature(jpg, txt, feat_path=Const.feature_path):
     strr = eva.load_txt(txt)
     l_objects, l_contents = eva.divide_para1(strr)
     pos_objects = []
-    neg_objects = []
     for i, l_c in enumerate(l_contents):
         if l_c == '0':
             pos_objects.append(l_objects[i])
-        else:
-            neg_objects.append(l_objects[i])
+            # else:
+            # neg_objects.append(l_objects[i])
+
+    neg_objects = eva.generate_neg_region(image, pos_objects)
 
     # extract pos hog feature
     for j, i in enumerate(pos_objects):
@@ -54,17 +55,15 @@ def extract_feature(jpg, txt, feat_path=Const.feature_path):
 
         # TODO: add negative hog features in txts
 
-
-'''
     # extract neg hog feature
     for j, i in enumerate(neg_objects):
         seg_image = cut_image(image, i)
-        pre.display(seg_image)
+        seg_image = transform.resize(seg_image, Const.normal_size)
+        # pre.display(seg_image)
         fd_s, hog_image_s = compute_hog(seg_image)
         fd_s_name = os.path.split(jpg)[1].split('.')[0] + '_' + j.__str__() + '.feat'
-        fd_s_path = os.path.join(svm_path[1], fd_s_name)
-        print(fd_s_path)
-        '''
+        fd_s_path = os.path.join(feat_path[1], fd_s_name)
+        joblib.dump(fd_s, fd_s_path)
 
 
 def extract_features(src_path, svm_path):
@@ -85,7 +84,7 @@ def extract_features(src_path, svm_path):
         extract_feature(jpg, txts[i], svm_path)
 
 
-def train_classifier(feat_path=Const.feature_path, model_path=Const.model_path):
+def train_classifier(feat_path=Const.feature_path, model_path=Const.model_path[0]):
     # Train positive features
     pos_list_dirs = os.walk(feat_path[0])
     neg_list_dirs = os.walk(feat_path[1])
@@ -110,6 +109,31 @@ def train_classifier(feat_path=Const.feature_path, model_path=Const.model_path):
     clf.fit(fds, labels)
     date = 20170623
     joblib.dump(clf, model_path + date.__str__() + '.clf')
+
+
+def predict_image():
+    ii = 1
+    src_image = eva.load_image(Const.image + ii.__str__() + '.jpg')
+    p_objects = pre.preprocess(src_image)
+    p_results = []
+    clf = joblib.load(Const.model_path[0] + '20170623.clf')
+    for i, p_object in enumerate(p_objects):
+        seg_image = cut_image(src_image, p_object)
+        seg_image = transform.resize(seg_image, Const.normal_size)
+        fd, hog_image = compute_hog(seg_image)
+        pred = clf.predict(fd)
+        p_results.append(pred)
+
+    for i, pred in enumerate(p_results):
+        if pred == 1:
+            plt.imshow(cut_image(src_image, p_objects[i]))
+            plt.title('1')
+            plt.show()
+        if pred == 0:
+            plt.imshow(cut_image(src_image, p_objects[i]))
+            plt.title('0')
+            plt.show()
+    print(p_results)
 
 
 def test_cut_image():
@@ -196,9 +220,14 @@ def compute_size():
     plt.show()
 
 
+def test_predict_image():
+    predict_image()
+
+
 if __name__ == '__main__':
     # test_cut_image()
     # test_hog()
     # test_extract_features()
-    test_train_classifier()
+    # test_train_classifier()
     # compute_size()
+    test_predict_image()

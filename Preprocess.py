@@ -141,7 +141,8 @@ def divide_seg(label_image):
     return objects
 
 
-def correct_range(objects):
+def correct_range(objects, img_shape):
+    rows, cols, dim = img_shape
     for seg in objects:
         for point in seg:
             if point[0] < 0:
@@ -164,7 +165,7 @@ def preprocess(src_img):
     label_image = connect_component_labeling(img1)
     image_label_overlay = color.label2rgb(label_image, image=src_img)
     objects = divide_seg(label_image=label_image)
-    objects = correct_range(objects)
+    objects = correct_range(objects, src_img.shape)
     # eva.draw_lines(src_img, objects, color='r')
 
     # fig, (ax0, ax1) = plt.subplots(1, 2)
