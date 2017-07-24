@@ -217,6 +217,16 @@ def generate_neg_region(src_img, pos_objects):
     cols -= 1
     temp_objects = pos_objects.copy()
     neg_objects = []
+
+
+def generate_neg_region1(src_img, pos_objects):
+    # Todo: Generate better neg_image
+
+    rows, cols, dims = src_img.shape
+    rows -= 1
+    cols -= 1
+    temp_objects = pos_objects.copy()
+    neg_objects = []
     for i in range(len(pos_objects)):
         x1 = np.random.randint(0, cols)
         y1 = np.random.randint(0, rows)

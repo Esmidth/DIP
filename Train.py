@@ -19,6 +19,7 @@ def cut_image(image, seg):
 
 
 def compute_hog(image=data.astronaut()):
+    # Todo: Adjust hog parameters, including orientations, pixels_per_cell, cells_per_block
     image = color.rgb2grey(image)
     # image = exposure.adjust_gamma(image, 0.5)
     fd, hog_image = hog(image, orientations=8, pixels_per_cell=(16, 16), cells_per_block=(1, 1), visualise=True,
@@ -52,9 +53,6 @@ def extract_feature(jpg, txt, feat_path=Const.feature_path):
         fd_s_path = os.path.join(feat_path[0], fd_s_name)
         joblib.dump(fd_s, fd_s_path)
         # print(fd_s_path)
-
-        # TODO: add negative hog features in txts
-
     # extract neg hog feature
     for j, i in enumerate(neg_objects):
         seg_image = cut_image(image, i)
@@ -66,7 +64,7 @@ def extract_feature(jpg, txt, feat_path=Const.feature_path):
         joblib.dump(fd_s, fd_s_path)
 
 
-def extract_features(src_path, svm_path):
+def extract_features(src_path, svm_path=Const.feature_path):
     list_dirs = os.walk(src_path)
     jpgs = []
     txts = []
@@ -84,7 +82,68 @@ def extract_features(src_path, svm_path):
         extract_feature(jpg, txts[i], svm_path)
 
 
+def manual_extract_feature(jpg, txt, feat_path=Const.feature_path):
+    src_image = eva.load_image(jpg)
+    strr = eva.load_txt(txt)
+    l_objects, l_contents = eva.divide_para1(strr)
+    pos_objects = []
+
+    for i, l_c in enumerate(l_contents):
+        if l_c == '0':
+            pos_objects.append(l_objects[i])
+
+    neg_objects = []
+    neg_results = []
+    p_objects = pre.preprocess(src_image)
+
+    l_objects0 = []
+    for i, l_object in enumerate(l_objects):
+        if l_contents[i] == '0':
+            l_objects0.append(l_object)
+
+    l_objects = l_objects0
+
+    for i, l_object in enumerate(l_objects):
+        for j, p_object in enumerate(p_objects):
+            if eva.compute_rju(l_object, p_object) > 70:
+                eva.draw_lines(src_image, )
+
+    for j, i in enumerate(pos_objects):
+        seg_image = cut_image(src_image, i)
+        seg_image = transform.resize(seg_image, Const.normal_size)
+        fd_s, hog_image_s = compute_hog(seg_image)
+        fd_s_name = os.path.split(jpg)[0].split('.')[0] + '_' + j.__str__() + '.feat'
+        fd_s_path = os.path.join(feat_path[0], fd_s_name)
+        joblib.dump(fd_s, fd_s_path)
+
+    for j, i in enumerate(neg_objects):
+        seg_image = cut_image(src_image, i)
+        seg_image = transform.resize(seg_image, Const.normal_size)
+        fd_s, hog_image_s = compute_hog(seg_image)
+        fd_s_name = os.path.split(jpg)[1].split('.')[0] + '_' + j.__str__() + '.feat'
+        fd_s_path = os.path.join(feat_path[1], fd_s_name)
+        joblib.dump(fd_s, fd_s_path)
+
+
+def manual_extract_features(src_path, svm_path=Const.feature_path):
+    list_dirs = os.walk(src_path)
+    jpgs = []
+    txts = []
+    for root, dirs, files in list_dirs:
+        for f in files:
+            if 'jpg' in f:
+                path = os.path.join(root, f)
+                jpgs.append(path)
+            elif 'txt' in f:
+                path = os.path.join(root, f)
+                txts.append(path)
+
+    for i, jpg in enumerate(jpgs):
+        manual_extract_feature(jpg, txts[i], svm_path)
+
+
 def train_classifier(feat_path=Const.feature_path, model_path=Const.model_path[0]):
+    # Todo: Adjust parameters in training svm classifier
     # Train positive features
     pos_list_dirs = os.walk(feat_path[0])
     neg_list_dirs = os.walk(feat_path[1])
@@ -107,12 +166,12 @@ def train_classifier(feat_path=Const.feature_path, model_path=Const.model_path[0
     # clf = LinearSVC()
     clf = svm.SVC()
     clf.fit(fds, labels)
-    date = 20170623
+    date = 20170723
     joblib.dump(clf, model_path + date.__str__() + '.clf')
 
 
 def predict_image():
-    ii = 1
+    ii = 5
     src_image = eva.load_image(Const.image + ii.__str__() + '.jpg')
     p_objects = pre.preprocess(src_image)
     p_results = []
@@ -179,6 +238,10 @@ def test_train_classifier():
     train_classifier()
 
 
+def test_manual_extract_features():
+    manual_extract_features(Const.src_path, Const.feature_path)
+
+
 def compute_size():
     list_dirs = os.walk(Const.src_path)
     x_sizes = []
@@ -228,6 +291,7 @@ if __name__ == '__main__':
     # test_cut_image()
     # test_hog()
     # test_extract_features()
+    test_manual_extract_features()
     # test_train_classifier()
     # compute_size()
-    test_predict_image()
+    # test_predict_image()
